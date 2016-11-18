@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ToDoApp</title>
+  <link rel="stylesheet" type="text/css" href="css/react.css">
+  <script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
+  <script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+</head>
+<body>
+    <div id="container" class='container'></div>
+    <script type="text/babel">
+        var Title = () => {
+          return (
+            <div>
+               <div>
+                  <h1>To-Do</h1>
+               </div>
+            </div>
+          );
+        }
+        var TodoForm = ({addTodo}) => {
+        let input;
+        return (
+          <div>
+            <input required  placeholder="What needs to be done..?" ref={node => {
+              input = node;
+            }} onKeyPress={(event) => {
+              if(event.key=='Enter' && (input.value.trim()!=''))
+              {
+                  addTodo(input.value);
+                  input.value = '';
+              }
+              }}/>
+            <button onClick={(event) => {
+              if(input.value.trim()!='')
+              {
+              addTodo(input.value);
+              input.value = '';
+              }
+            }}>
+              Add Task
+            </button>
+          </div>
+        );
+      };
+      var Todo = ({todo, remove,ticked, index}) => {
+        return (
+            <li>
+                <input className="text" type="checkbox"
+                    onChange={(event) => {ticked(todo,index,event)}} value={todo.checked} checked={todo.checked} />
+                <span id={index}>{todo.text}</span>
+                <span>
+                    <img src="cancle.png" onClick={ () => {remove(todo.id)}} />
+                </span>
+            </li>
+          );
+        } 
+      var TodoList = ({todos, remove,ticked}) => {
+        var todoNode = todos.map((todo,index) => {
+          return (<Todo todo={todo} remove={remove} ticked={ticked} key={todo.id} index={index} />)
+        });
+        return (<ul>{todoNode}</ul>);
+      }
+      window.id = 0;
+      class TodoApp extends React.Component{
+        constructor(props){
+          super(props);
+          this.state = {
+            data: []
+          }
+        }
+        addTodo(val){
+          console.log('val : '+val)
+          var todo = {text: val, id: window.id++,checked: false};
+          this.state.data.push(todo);
+          this.setState({data: this.state.data});
+        }
+        handleRemove(id){
+          var remainder = this.state.data.filter((todo) => {
+            if(todo.id !== id) return todo;
+          });
+          this.setState({data: remainder});
+        }
+        checkBoxed(todo,index,event){                     
+            todo.checked = event.target.checked;
+             console.log(todo.checked);
+          var _t = this.state.data;
+          _t[index] = todo;
+          console.log(todo);
+          this.setState({
+            data : _t
+          })
+            if(todo.checked)
+            {
+      			document.getElementById(index).style.textDecoration="line-through";
+         
+            }
+            else
+            {
+        				 document.getElementById(index).style.textDecoration="none";
+            
+            }
+           
+
+        }
+        render(){
+          return (
+            <div>
+              <Title />
+              <TodoForm addTodo={this.addTodo.bind(this)}/>
+              <TodoList
+                todos={this.state.data}
+                remove={this.handleRemove.bind(this)}
+                ticked={this.checkBoxed.bind(this)}
+              />
+            </div>
+          );
+        }
+      }
+      ReactDOM.render(<TodoApp />, document.getElementById('container'));
+    </script>
+</body>
+</html>
